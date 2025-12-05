@@ -1,3 +1,31 @@
+from grovepi import *
+from grove_rgb_lcd import *
+from time import sleep
+from math import isnan
+import mysql.connector
+from mysql.connector import Error
+
+dht_sensor_port = 7
+dht_sensor_type = 0  # 0 = blue sensor
+
+def conectar_db():
+    try:
+        conexion = mysql.connector.connect(
+            host="localhost",
+            user="sensores",
+            password="1234",
+            database="sensors"
+        )
+        if conexion.is_connected():
+            print("Conectado a MariaDB")
+        return conexion
+    except Error as e:
+        print("Error conectando a MariaDB:", e)
+        return None
+
+conexion = conectar_db()
+cursor = conexion.cursor() if conexion else None
+
 setRGB(0, 255, 0)
 
 while True:
@@ -19,7 +47,7 @@ while True:
             cursor = conexion.cursor() if conexion else None
 
         if conexion and conexion.is_connected():
-            sql = "INSERT INTO dht11 (temperatura, humedad) VALUES (%s, %s)"
+            sql = "INSERT INTO datos (temperatura, humedad) VALUES (%s, %s)"
             valores = (float(temp), float(hum))
             cursor.execute(sql, valores)
             conexion.commit()
@@ -39,3 +67,4 @@ while True:
         conexion = None  
 
     sleep(0.05)
+#final
